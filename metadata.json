@@ -1,0 +1,8 @@
+{
+  "name": "jfy-sh",
+  "description": "A highly realistic 1:1 Linux Terminal Emulator web app for the #JuaraVibeCoding challenge.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
