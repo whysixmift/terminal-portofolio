@@ -10,9 +10,9 @@ echo "📝 Setting up environment variables..."
 if [ ! -f .env ]; then
     cat <<EOT >> .env
 NODE_ENV=production
-GEMINI_API_KEY="YOUR_KEY_HERE"
-APP_URL="http://your-domain.sh"
-PORT=3000
+# In Hack Club Nest, you usually proxy your subdomain to the local port (e.g., 3000)
+# via Caddy, Nginx, or the Nest dashboard forwarding.
+APP_URL="https://your-app.hackclub.app"
 EOT
     echo "✅ Created .env with placeholder values. PLEASE UPDATE IT!"
 else
@@ -46,7 +46,14 @@ pm2 save
 
 echo "--------------------------------------------------"
 echo "✨ Deployment Complete!"
-echo "🌐 App is running on port 3000"
+echo "🌐 App is running locally on port 3000"
 echo "📊 Use 'pm2 status' to monitor."
 echo "📜 Use 'pm2 logs jfy-sh' to view output."
+echo ""
+echo "🔗 HOW TO FORWARD YOUR DOMAIN ON HACK CLUB NEST:"
+echo "1. If you are using Caddy, add this to your Caddyfile:"
+echo "   your-subdomain.hackclub.app {"
+echo "       reverse_proxy 127.0.0.1:3000"
+echo "   }"
+echo "2. Then run 'caddy reload'"
 echo "--------------------------------------------------"

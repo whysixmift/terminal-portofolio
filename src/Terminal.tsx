@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-// --- Virtual File System (VFS) Definition ---
-const VFS = {
+// --- Initial Virtual File System (VFS) ---
+const INITIAL_VFS: Record<string, string | { type: 'dir' }> = {
   'about_me.md': `## Julian
-Software & Robotics Engineer from SMKN 2 Bekasi.
-A passionate engineer who loves bridging the gap between software and hardware.
+Software & Robotics Engineer from Bekasi.
+JUst a self-taught low level developer and Robotic engineer.
 Currently diving deep into Linux systems and embedded programming.`,
   
-  'projects.txt': `1. JFY-SH: A realistic terminal emulator built with React.
-2. ROBOT-ARM: 4-DOF Arduino-controlled robotic arm.
-3. SMART-PLANT: IoT-based plant monitoring system with ESP32.
+  'projects.txt': `1. CLUEBREAKER V1.0 : A Robot my team built for First Tech Challenge 2026, We won.
+2. RL-ARM: 4-DOF Reinforcement Learning robotic arm.
+3. NUSA. (Nutrient Saver): An AI Based system that receive ur picture and shows the nutrition facts.
 4. LINUX-DASHBOARD: Custom system monitor for Debian servers.`,
   
   'skills.json': `{
@@ -21,35 +21,49 @@ Currently diving deep into Linux systems and embedded programming.`,
 }`,
 };
 
-const FASTFETCH_TEXT = `julian@jfy.sh
-OS: Debian GNU/Linux 12.5 (bookworm) x86_64
-Host: Virtual Machine Hyper-V UEFI Release v4.0
-Kernel: 6.1.0-21-amd64
-Uptime: 4 mins
-Resolution: 1920x1080
-DE: GNOME 43.9 (wayland)
-VIM: Mutter
-WPI Theme: Adwaita
-Theme: Adwaita [GTK2/3]
-Terminal: gnome-terminal
-CPU: Intel i5-10210U (1) @ 2.111GHz
-Fun fact! I can spend hours wiring microcontrollers and tweaking Arch Linux configs. 🛠️🐈
-Need help? Type 'help' to get started!`;
+const DEBIAN_LOGO = `
+                  .o+
+                 \`ooo/
+                \`+oooo:
+               \`+oooooo:
+               -+oooooo+:
+             \`/:-:++oooo+:
+            \`/++++/+++++++:
+           \`/++++++++++++++:
+          \`/+++ooooooooooooo/\`
+         ./ooosssso++osssssso+
+        .oossssso-\`\`\`\`/ossssss+
+       -osssssso.      :ssssssso.
+      :osssssss/        osssso+++.
+     /ossssssss/        +ssssooo/-
+   \`/ossssso+/:-        -:/+osssso+-
+  \`+sso+:-\`                 \`.-/+oso:
+ \`++:.                           \`-/+/
+ .\`           ;
+`;
 
 type LogEntry = {
-  type: 'command' | 'output' | 'raw';
-  content: string;
+  type: 'command' | 'output' | 'raw' | 'fastfetch';
+  content?: string;
   dir?: string;
 };
 
 export default function Terminal() {
   const [input, setInput] = useState('');
   const [currentDir, setCurrentDir] = useState('~');
+  const [vfs, setVfs] = useState(INITIAL_VFS);
   const [history, setHistory] = useState<LogEntry[]>([
-    { type: 'raw', content: FASTFETCH_TEXT }
+    { type: 'fastfetch' }
   ]);
+  
+  // Nano Editor State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingFile, setEditingFile] = useState('');
+  const [editContent, setEditContent] = useState('');
+
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const nanoRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -57,8 +71,16 @@ export default function Terminal() {
     }
   }, [history]);
 
+  useEffect(() => {
+    if (isEditing) {
+        nanoRef.current?.focus();
+    } else {
+        inputRef.current?.focus();
+    }
+  }, [isEditing]);
+
   const handleTerminalClick = () => {
-    inputRef.current?.focus();
+    if (!isEditing) inputRef.current?.focus();
   };
 
   const executeCommand = (cmd: string) => {
@@ -83,24 +105,90 @@ export default function Terminal() {
           type: 'output',
           content: `Standard helpful tips:
 - ls [-l]: List filenames (use -l for long format).
+- mkdir [name]: Create a new directory.
+- nano [file]: Edit or create a text file.
 - cat [filename]: Display the contents of a file.
+- portfolio: View Julian's engineering portfolio & skills.
+- social: Show my social media links.
 - echo [text]: Print text to the terminal.
 - cd [dir]: Change the current directory.
 - date: Display the current date and time.
-- admin: Access the administrative dashboard.
 - clear: Clear the terminal screen.
 - help: Show this help message.`
         });
         break;
 
-      case 'admin':
+      case 'portfolio':
         newEntries.push({
           type: 'output',
-          content: 'Redirecting to Admin Panel...'
+          content: `
+📂 Julian's Engineering Portfolio
+=================================
+Software & Robotics Engineer from Bekasi.
+Self-taught low level developer and Robotic engineer.
+
+🚀 TOP PROJECTS:
+----------------
+- CLUEBREAKER V1.0: First Tech Challenge 2026 Robot.
+- RL-ARM: 4-DOF Reinforcement Learning robotic arm.
+- NUSA: AI Based nutrition fact system.
+- LINUX-DASHBOARD: Custom system monitor.
+
+🛠️ TECH STACK:
+--------------
+- Languages: TypeScript, C, Python, C++, Rust
+- Frameworks: React, Express, ROS2
+- OS: Debian, Arch Linux, RTOS
+
+🌐 SOCIALS:
+-----------
+- Discord: @flux0x21
+- Instagram: @avrjulian.ino
+- GitHub: @whysixmift
+- Email: miftasigma11@gmail.com
+
+Type 'cat about_me.md', 'cat projects.txt' or 'cat skills.json' for more details.`
         });
-        setTimeout(() => {
-           window.location.href = '/admin';
-        }, 1000);
+        break;
+
+      case 'social':
+        newEntries.push({
+          type: 'output',
+          content: `
+🌐 SOCIALS:
+-----------
+- Discord: @flux0x21
+- Instagram: @avrjulian.ino
+- GitHub: @whysixmift
+- Email: miftasigma11@gmail.com`
+        });
+        break;
+
+      case 'mkdir':
+        if (args.length === 0) {
+            newEntries.push({ type: 'output', content: 'mkdir: missing operand' });
+        } else {
+            const dirName = args[0];
+            setVfs(prev => ({ ...prev, [dirName]: { type: 'dir' } }));
+            newEntries.push({ type: 'output', content: `Created directory: ${dirName}` });
+        }
+        break;
+
+      case 'nano':
+        if (args.length === 0) {
+            newEntries.push({ type: 'output', content: 'nano: missing filename' });
+        } else {
+            const filename = args[0];
+            const fileData = vfs[filename];
+            if (fileData && typeof fileData !== 'string') {
+                newEntries.push({ type: 'output', content: `nano: ${filename} is a directory` });
+            } else {
+                setEditingFile(filename);
+                setEditContent(fileData as string || '');
+                setIsEditing(true);
+                return; // Don't add to history yet
+            }
+        }
         break;
 
       case 'date':
@@ -122,32 +210,36 @@ export default function Terminal() {
           setCurrentDir('~');
         } else {
           const newDir = args[0];
-          if (newDir === 'projects' || newDir === '/projects') {
-              setCurrentDir('~/projects');
+          if (vfs[newDir] && typeof vfs[newDir] !== 'string') {
+              setCurrentDir(prev => prev === '~' ? `~/${newDir}` : `${prev}/${newDir}`);
           } else if (newDir === '..') {
               setCurrentDir('~');
           } else {
-              setCurrentDir(newDir.startsWith('/') ? newDir : `${currentDir}/${newDir}`.replace(/\/+/g, '/'));
+              newEntries.push({ type: 'output', content: `cd: ${newDir}: No such directory` });
           }
         }
         break;
 
       case 'ls':
         const isLongFormat = args.includes('-l');
+        const files = Object.keys(vfs);
         if (isLongFormat) {
-          const longOutput = Object.keys(VFS).map(file => {
-            const size = VFS[file as keyof typeof VFS].length;
+          const longOutput = files.map(file => {
+            const data = vfs[file];
+            const isDir = typeof data !== 'string';
+            const size = isDir ? 4096 : (data as string).length;
+            const typeChar = isDir ? 'd' : '-';
             const sizeStr = size.toString().padStart(5);
-            return `-rw-r--r-- 1 julian julian ${sizeStr} May 16 08:00 ${file}`;
+            return `${typeChar}rw-r--r-- 1 julian julian ${sizeStr} May 16 08:00 ${file}`;
           }).join('\n');
           newEntries.push({
             type: 'output',
-            content: `total ${Object.keys(VFS).length * 4}\n${longOutput}`
+            content: `total ${files.length * 4}\n${longOutput}`
           });
         } else {
           newEntries.push({
             type: 'output',
-            content: Object.keys(VFS).join('  ')
+            content: files.join('  ')
           });
         }
         break;
@@ -157,8 +249,11 @@ export default function Terminal() {
           newEntries.push({ type: 'output', content: 'usage: cat [filename]' });
         } else {
           const filename = args[0];
-          if (VFS[filename as keyof typeof VFS]) {
-            newEntries.push({ type: 'output', content: VFS[filename as keyof typeof VFS] });
+          const fileContent = vfs[filename];
+          if (fileContent && typeof fileContent === 'string') {
+            newEntries.push({ type: 'output', content: fileContent });
+          } else if (fileContent) {
+             newEntries.push({ type: 'output', content: `cat: ${filename}: Is a directory` });
           } else {
             newEntries.push({ type: 'output', content: `cat: ${filename}: No such file or directory` });
           }
@@ -179,10 +274,48 @@ export default function Terminal() {
     }
   };
 
+  const handleNanoKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        setVfs(prev => ({ ...prev, [editingFile]: editContent }));
+        setHistory(prev => [...prev, { type: 'command', content: `nano ${editingFile}`, dir: currentDir }, { type: 'output', content: `Saved ${editingFile}` }]);
+    }
+    if (e.ctrlKey && e.key === 'x') {
+        e.preventDefault();
+        setIsEditing(false);
+        setEditingFile('');
+        setEditContent('');
+    }
+  };
+
+  if (isEditing) {
+    return (
+        <div className="min-h-screen bg-[#1e1e2e] text-[#cdd6f4] font-mono flex flex-col p-0">
+            <div className="bg-[#cdd6f4] text-[#1e1e2e] px-2 py-1 text-sm flex justify-between">
+                <span>GNU nano 7.2</span>
+                <span className="font-bold underline">{editingFile}</span>
+                <span>Modified</span>
+            </div>
+            <textarea
+                ref={nanoRef}
+                className="flex-1 bg-transparent border-none outline-none p-4 resize-none text-[#cdd6f4] caret-white"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                onKeyDown={handleNanoKeyDown}
+                spellCheck={false}
+            />
+            <div className="bg-[#181825] p-2 text-xs flex gap-6 text-[#9399b2]">
+                <div><span className="bg-[#313244] px-1 text-white">^X</span> Exit</div>
+                <div><span className="bg-[#313244] px-1 text-white">^S</span> Save</div>
+            </div>
+        </div>
+    );
+  }
+
   return (
     <div 
       id="terminal-container"
-      className="min-h-screen bg-[#09090b] text-[#f4f4f5] font-mono p-4 md:p-8 flex flex-col cursor-text"
+      className="min-h-screen bg-[#1e1e2e] text-[#cdd6f4] font-mono p-4 md:p-8 flex flex-col cursor-text"
       onClick={handleTerminalClick}
     >
       <div 
@@ -200,15 +333,39 @@ export default function Terminal() {
                 className="whitespace-pre-wrap break-words"
               >
                 {entry.type === 'command' ? (
-                  <div className="flex gap-2">
-                    <span className="text-[#a1a1aa]">julian@jfy.sh</span>
+                  <div className="flex gap-2 text-xs md:text-sm">
+                    <span className="text-[#b4befe]">julian@arch</span>
                     <span className="text-zinc-500">:</span>
                     <span className="text-zinc-400">{entry.dir || '~'}</span>
-                    <span className="text-zinc-500">$</span>
-                    <span>{entry.content}</span>
+                    <span className="text-[#f38ba8]">$</span>
+                    <span className="text-[#cdd6f4]">{entry.content}</span>
+                  </div>
+                ) : entry.type === 'fastfetch' ? (
+                  <div className="flex flex-col md:flex-row gap-4 items-start text-xs md:text-sm my-4">
+                    <div className="text-[#89b4fa] whitespace-pre font-bold leading-tight align-top select-none shrink-0" style={{ marginTop: '-1rem' }}>
+                      {DEBIAN_LOGO}
+                    </div>
+                    <div className="flex flex-col text-[#cdd6f4] leading-tight shrink-0">
+                       <div className="font-bold">
+                         <span className="text-[#b4befe]">julian</span>@<span className="text-[#b4befe]">arch</span>
+                       </div>
+                       <div className="text-zinc-500">-------------</div>
+                       <div><strong className="text-[#74c7ec]">OS</strong>: Arch Linux x86_64</div>
+                       <div><strong className="text-[#74c7ec]">Host</strong>: Virtual Machine Hyper-V UEFI Release v4.0</div>
+                       <div><strong className="text-[#74c7ec]">Kernel</strong>: Linux 6.19.14-arch1-1</div>
+                       <div><strong className="text-[#74c7ec]">Uptime</strong>: 67 hours</div>
+                       <div><strong className="text-[#74c7ec]">Terminal</strong>: bash</div>
+                       <div><strong className="text-[#74c7ec]">CPU</strong>: AMD Ryzen Threadripper PRO 7995WX 96-Cores (192) @ 5.14 GHz</div>
+                       <div><strong className="text-[#74c7ec]">Memory</strong>: 205.4 MiB / 1.94 TiB</div>
+                       <div><strong className="text-[#74c7ec]">Swap</strong>: 100.3 MiB / 1.96 TiB</div>
+                       <div><strong className="text-[#74c7ec]">Disk</strong>: 31.8 GiB / 24 TiB (0%)</div>
+                       <br />
+                       <div className="whitespace-normal max-w-lg mb-1"><strong className="text-[#f9e2af]">Fun fact!</strong> I can spend hours wiring microcontrollers. 🛠️🐈</div>
+                       <div className="whitespace-normal max-w-lg"><strong className="text-[#a6e3a1]">Need help?</strong> Type 'help' or 'portfolio' to get started!</div>
+                    </div>
                   </div>
                 ) : (
-                  <div className={entry.type === 'output' ? 'text-zinc-300' : ''}>
+                  <div className={`text-xs md:text-sm ${entry.type === 'output' ? 'text-[#bac2de]' : 'text-[#f5c2e7]'}`}>
                     {entry.content}
                   </div>
                 )}
@@ -217,17 +374,17 @@ export default function Terminal() {
           </AnimatePresence>
         </div>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center text-xs md:text-sm mt-2">
           <div className="flex gap-2 shrink-0">
-            <span className="text-[#a1a1aa]">julian@jfy.sh</span>
+            <span className="text-[#b4befe]">julian@arch</span>
             <span className="text-zinc-500">:</span>
             <span className="text-zinc-400">{currentDir}</span>
-            <span className="text-zinc-500">$</span>
+            <span className="text-[#f38ba8]">$</span>
           </div>
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 bg-transparent border-none outline-none text-[#f4f4f5] font-mono p-0 focus:ring-0"
+            className="flex-1 bg-transparent border-none outline-none text-[#cdd6f4] font-mono p-0 focus:ring-0 text-xs md:text-sm"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
