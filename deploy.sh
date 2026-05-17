@@ -38,8 +38,13 @@ echo "🔄 Starting application with PM2..."
 # Kill existing process if any
 pm2 delete jfy-sh || true
 
+# Source the .env file if it exists so pm2 inherits variables
+if [ -f .env ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
+
 # Start the bundled server
-pm2 start dist/server.cjs --name jfy-sh --env production
+NODE_ENV=production pm2 start dist/server.cjs --name jfy-sh
 
 # 6. Save PM2 State
 pm2 save

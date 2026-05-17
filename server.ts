@@ -1,10 +1,13 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   // Middleware
   app.use(express.json());
@@ -15,7 +18,8 @@ async function startServer() {
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  const isProd = process.env.NODE_ENV === "production" || __filename.endsWith("server.cjs");
+  if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
