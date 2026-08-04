@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -25,7 +24,8 @@ async function startServer() {
   const isProd = process.env.NODE_ENV === "production" || __filename.endsWith("server.cjs");
 
   if (!isProd) {
-    // Development: use Vite's dev server as middleware
+    // Development: dynamically import Vite (not needed in production)
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -33,7 +33,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     // Production: serve the built static files
-    const distPath = path.join(process.cwd(), "dist");
+    const distPath = path.join(__dirname);
     app.use(express.static(distPath, { maxAge: "1d" }));
     // Support React Router: send all non-API requests to index.html
     app.get("*", (req, res) => {
@@ -49,4 +49,8 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error("❌ Failed to start server:", err);
+  process.exit(1);
+});
+
