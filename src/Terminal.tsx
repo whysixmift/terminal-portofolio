@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'motion/react';
 const INITIAL_VFS: Record<string, string | { type: 'dir' }> = {
   'about_me.md': `## Julian
 Software & Robotics Engineer from Bekasi.
-JUst a self-taught low level developer and Robotic engineer.
+Self-taught low-level developer and robotics engineer.
 Currently diving deep into Linux systems and embedded programming.`,
   
-  'projects.txt': `1. CLUEBREAKER V1.0 : A Robot my team built for First Tech Challenge 2026, We won.
+  'projects.txt': `1. CLUEBREAKER V1.0: First Tech Challenge 2026 Competition Robot.
 2. RL-ARM: 4-DOF Reinforcement Learning robotic arm.
-3. NUSA. (Nutrient Saver): An AI Based system that receive ur picture and shows the nutrition facts.
+3. NUSA (Nutrient Saver): Image recognition system for analyzing nutrition facts.
 4. LINUX-DASHBOARD: Custom system monitor for Debian servers.`,
   
   'skills.json': `{
@@ -122,25 +122,25 @@ export default function Terminal() {
         newEntries.push({
           type: 'output',
           content: `
-📂 Julian's Engineering Portfolio
+Julian's Engineering Portfolio
 =================================
 Software & Robotics Engineer from Bekasi.
-Self-taught low level developer and Robotic engineer.
+Self-taught low-level developer and robotics engineer.
 
-🚀 TOP PROJECTS:
+TOP PROJECTS:
 ----------------
 - CLUEBREAKER V1.0: First Tech Challenge 2026 Robot.
 - RL-ARM: 4-DOF Reinforcement Learning robotic arm.
-- NUSA: AI Based nutrition fact system.
+- NUSA: Image recognition nutrition system.
 - LINUX-DASHBOARD: Custom system monitor.
 
-🛠️ TECH STACK:
+TECH STACK:
 --------------
 - Languages: TypeScript, C, Python, C++, Rust
 - Frameworks: React, Express, ROS2
 - OS: Debian, Arch Linux, RTOS
 
-🌐 SOCIALS:
+SOCIALS:
 -----------
 - Discord: @flux0x21
 - Instagram: @avrjulian.ino
@@ -155,7 +155,7 @@ Type 'cat about_me.md', 'cat projects.txt' or 'cat skills.json' for more details
         newEntries.push({
           type: 'output',
           content: `
-🌐 SOCIALS:
+SOCIALS:
 -----------
 - Discord: @flux0x21
 - Instagram: @avrjulian.ino
@@ -360,8 +360,8 @@ Type 'cat about_me.md', 'cat projects.txt' or 'cat skills.json' for more details
                        <div><strong className="text-[#74c7ec]">Swap</strong>: 100.3 MiB / 1.96 TiB</div>
                        <div><strong className="text-[#74c7ec]">Disk</strong>: 31.8 GiB / 24 TiB (0%)</div>
                        <br />
-                       <div className="whitespace-normal max-w-lg mb-1"><strong className="text-[#f9e2af]">Fun fact!</strong> I can spend hours wiring microcontrollers. 🛠️🐈</div>
-                       <div className="whitespace-normal max-w-lg"><strong className="text-[#a6e3a1]">Need help?</strong> Type 'help' or 'portfolio' to get started!</div>
+                       <div className="whitespace-normal max-w-lg mb-1"><strong className="text-[#f9e2af]">Note:</strong> Specializing in microcontroller systems and embedded programming.</div>
+                       <div className="whitespace-normal max-w-lg"><strong className="text-[#a6e3a1]">Usage:</strong> Type 'help' or 'portfolio' to view available commands.</div>
                     </div>
                   </div>
                 ) : (
